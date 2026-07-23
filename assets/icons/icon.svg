@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#21d6e8"/><stop offset="1" stop-color="#8bffba"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#06121c"/>
+  <rect x="26" y="26" width="460" height="460" rx="94" fill="none" stroke="url(#g)" stroke-width="18"/>
+  <circle cx="256" cy="256" r="116" fill="#f7fbff"/>
+  <path d="M256 139l66 48-25 78h-82l-25-78z" fill="#17212a"/>
+  <path d="M190 187l-55 40 21 66 59-28zm132 0l55 40-21 66-59-28zm-107 78l-37 72 62 45 16-74zm82 0l37 72-62 45-16-74z" fill="#17212a"/>
+  <circle cx="256" cy="256" r="116" fill="none" stroke="#d7e4ea" stroke-width="10"/>
+  <rect x="105" y="401" width="302" height="55" rx="28" fill="url(#g)"/>
+  <text x="256" y="440" text-anchor="middle" font-family="Arial,sans-serif" font-size="29" font-weight="900" fill="#06121c">장르만 FC</text>
+</svg>
