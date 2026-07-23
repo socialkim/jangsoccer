@@ -76,6 +76,7 @@ Chromium 모바일 에뮬레이션 환경에서 390×844 화면을 기준으로 
 ## 로컬 실행
 
 ```bash
+python tools/generate_assets.py
 python -m http.server 8000
 ```
 
