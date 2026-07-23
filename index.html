@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#07131f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="장르만 FC">
+  <meta name="description" content="장르만 여의도의 토크쇼 감성을 아케이드 축구로 재해석한 3D 브라우저 게임">
+  <title>장르만 여의도: 마우스복싱 FC 3D</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="preload" href="assets/images/seoul-skyline.jpg" as="image">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <canvas id="game" aria-label="3D 축구 경기 화면"></canvas>
+  <div id="skyTint" aria-hidden="true"></div>
+  <div id="vignette" aria-hidden="true"></div>
+
+  <section id="menu" class="screen">
+    <div class="menu-card">
+      <header class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="live-dot"></span> JTBC 장르만 여의도 INSPIRED · FAN GAME CONCEPT</div>
+          <h1>마우스복싱 <em>FC 3D</em></h1>
+          <p class="subtitle">가벼운 정치 토크의 속도감과 ‘논점 대결’을 5대5 아케이드 축구로 재해석했습니다. 패스·태클·특수기·논점 토큰·중계 카메라까지 모두 브라우저에서 작동합니다.</p>
+          <div class="feature-chips">
+            <span>🎙 생방송 중계</span><span>⚽ 5 vs 5</span><span>✨ 캐릭터 특수기</span><span>🔊 경기장 음향</span>
+          </div>
+        </div>
+        <div class="hero-score-card" aria-hidden="true">
+          <small>LIVE PREVIEW</small><b>11:00</b><span>장르만 FC vs 논점이탈 FC</span>
+        </div>
+      </header>
+
+      <div class="menu-body">
+        <div class="section-title"><b>선발 캐릭터</b><span>캐릭터 설정은 프로그램 포맷을 게임 문법으로 각색한 창작 요소입니다.</span></div>
+        <div id="castGrid" class="cast-grid"></div>
+
+        <div class="setup-grid">
+          <label class="setting-card">
+            <span>경기 시간</span>
+            <select id="durationSelect">
+              <option value="90">90초 · 데모</option>
+              <option value="120" selected>120초 · 기본</option>
+              <option value="180">180초 · 풀매치</option>
+            </select>
+          </label>
+          <label class="setting-card">
+            <span>상대 난이도</span>
+            <select id="difficultySelect">
+              <option value="0.86">쉬움</option>
+              <option value="1" selected>보통</option>
+              <option value="1.16">어려움</option>
+            </select>
+          </label>
+          <label class="setting-card sound-setting">
+            <span>오디오</span>
+            <button id="menuSoundBtn" type="button">🔊 소리 켜짐</button>
+          </label>
+        </div>
+
+        <div class="menu-actions">
+          <p class="concept"><strong>조작</strong> WASD/방향키 이동 · Shift 질주 · Space 슛 · F 패스/태클 · E 특수기 · Q 선수 변경 · C 카메라 · M 음소거</p>
+          <button id="startBtn" class="start-btn" type="button">생방송 경기 시작 <span>▶</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="hud" aria-live="polite">
+    <div class="top-left-live"><span class="live-dot"></span><b>LIVE</b><span id="cameraLabel">추적 카메라</span></div>
+    <button id="soundBtn" class="hud-icon-btn" type="button" aria-label="소리 켜기 또는 끄기">🔊</button>
+
+    <div class="scorebar">
+      <div class="team home">장르만 FC</div>
+      <div id="score" class="score">0 : 0</div>
+      <div class="team away">논점이탈 FC</div>
+      <div id="clock" class="clock">02:00</div>
+    </div>
+
+    <div id="commentary"></div>
+    <div id="countdown"><b>3</b><span>킥오프 준비</span></div>
+    <div id="replayLabel">● REPLAY</div>
+
+    <aside class="player-panel">
+      <div class="player-head">
+        <div><div id="hudName" class="player-name">정영진</div><div id="hudRole" class="player-role">토크 플레이메이커</div></div>
+        <div><div id="hudSkill" class="skill-name">마우스복싱</div><div class="key-hint">E 특수기</div></div>
+      </div>
+      <div class="meter-label"><span>STAMINA</span><span id="staminaText">100%</span></div>
+      <div class="meter"><i id="staminaBar"></i></div>
+      <div class="meter-label"><span>SPECIAL</span><span id="skillText">READY</span></div>
+      <div class="meter special"><i id="skillBar"></i></div>
+    </aside>
+
+    <aside class="combo-panel">
+      <div class="combo-title"><span>생방송 열기</span><b id="comboValue">x1.0</b></div>
+      <div class="combo-meter"><i id="comboBar"></i></div>
+      <small id="comboCopy">패스와 슛으로 중계 열기를 올리세요</small>
+    </aside>
+
+    <aside class="stats-panel">
+      <div><span>슈팅</span><b id="shotsStat">0 - 0</b></div>
+      <div><span>패스</span><b id="passesStat">0 - 0</b></div>
+      <div><span>점유율</span><b id="possessionStat">50 - 50</b></div>
+    </aside>
+
+    <canvas id="minimap" width="320" height="208" aria-label="미니맵"></canvas>
+    <div id="broadcastTicker"><b>장르만 속보</b><span id="tickerText">핵심 논점을 골문까지 연결하십시오.</span></div>
+
+    <div id="controlsTip">
+      이동 <kbd>WASD</kbd> <kbd>←↑↓→</kbd><br>
+      질주 <kbd>SHIFT</kbd> · 슛 <kbd>SPACE</kbd><br>
+      패스/태클 <kbd>F</kbd> · 특수기 <kbd>E</kbd><br>
+      선수 <kbd>Q</kbd> · 카메라 <kbd>C</kbd> · 일시정지 <kbd>P</kbd>
+    </div>
+  </section>
+
+  <div id="goalBanner"><b>GOAL!</b><span>논점을 정확히 찔렀습니다</span></div>
+  <div id="flash"></div>
+
+  <section id="pauseScreen" class="screen modal-screen">
+    <div class="modal-card">
+      <div class="eyebrow">BROADCAST PAUSED</div>
+      <h2>생방송 잠시 중단</h2>
+      <p>화면을 정리하고 다시 경기를 이어가세요.</p>
+      <button id="resumeBtn" class="primary-btn" type="button">계속하기</button>
+    </div>
+  </section>
+
+  <section id="endScreen" class="screen modal-screen">
+    <div class="end-card">
+      <div class="eyebrow">MATCH REPORT</div>
+      <h2 id="resultTitle">장르만 FC 승리!</h2>
+      <div id="finalScore" class="final-score">0 : 0</div>
+      <p id="resultCopy">팩트와 논리가 완벽한 티키타카를 만들었습니다.</p>
+      <div id="finalStats" class="final-stats"></div>
+      <div class="end-actions">
+        <button id="restartBtn" class="primary-btn" type="button">같은 설정으로 재경기</button>
+        <button id="menuBtn" class="secondary-btn" type="button">선수 다시 선택</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="mobileControls" aria-label="모바일 조작 버튼">
+    <div id="orientationHint">📱 가로 화면으로 돌리면 경기장이 더 넓게 보입니다.</div>
+    <div class="mobile-utility" aria-label="모바일 보조 기능">
+      <button type="button" data-action="camera" aria-label="카메라 전환">📹</button>
+      <button type="button" data-action="pause" aria-label="일시정지">Ⅱ</button>
+    </div>
+    <div class="dpad">
+      <button class="up" data-key="arrowup" aria-label="위">▲</button>
+      <button class="down" data-key="arrowdown" aria-label="아래">▼</button>
+      <button class="left" data-key="arrowleft" aria-label="왼쪽">◀</button>
+      <button class="right" data-key="arrowright" aria-label="오른쪽">▶</button>
+    </div>
+    <div class="action">
+      <button class="special" data-action="special">E<small>특수기</small></button>
+      <button class="pass" data-action="pass">F<small>패스</small></button>
+      <button class="switch" data-action="switch" aria-label="선수 전환">Q</button>
+      <button class="sprint" data-key="shift" aria-label="질주">BOOST</button>
+      <button class="kick" data-action="kick" aria-label="슛">KICK</button>
+    </div>
+  </div>
+
+  <section id="error" class="screen">
+    <div class="error-card"><h2>3D 화면을 시작하지 못했습니다</h2><p>이 브라우저에서 WebGL이 꺼져 있거나 그래픽 가속을 사용할 수 없습니다. Chrome 또는 Edge 최신 버전에서 하드웨어 가속을 켜고 다시 열어주세요.</p></div>
+  </section>
+
+  <script src="js/game.js" defer></script>
+</body>
+</html>
